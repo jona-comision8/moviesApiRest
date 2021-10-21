@@ -3,6 +3,8 @@ const db = require('../database/models');
 const sequelize = db.sequelize;
 const { Op } = require("sequelize");
 const moment = require('moment');
+const fetch = require('node-fetch');
+const axios = require('axios')
 
 
 //Aqui tienen otra forma de llamar a cada uno de los modelos
@@ -10,24 +12,39 @@ const Movies = db.Movie;
 const Genres = db.Genre;
 const Actors = db.Actor;
 
+const BASE_URL = "http://localhost:3001/api/"
+
 
 const moviesController = {
     'list': (req, res) => {
-        db.Movie.findAll({
+        fetch(`${BASE_URL}movies`) // http://localhost:3001/api/movies
+            .then(response => response.json())
+            .then(result => {
+                return res.render('moviesList.ejs', {
+                    movies: result.data
+                })
+            })
+      /*   db.Movie.findAll({
             include: ['genre']
         })
             .then(movies => {
                 res.render('moviesList.ejs', {movies})
-            })
+            }) */
     },
     'detail': (req, res) => {
-        db.Movie.findByPk(req.params.id,
+        axios.get(`${BASE_URL}movies/${req.params.id}`)// http://localhost:3001/api/movies/5
+            .then(response => {
+                return  res.render('moviesDetail.ejs', {
+                    movie: response.data.data
+                }); 
+            })
+     /*    db.Movie.findByPk(req.params.id,
             {
                 include : ['genre']
             })
             .then(movie => {
                 res.render('moviesDetail.ejs', {movie});
-            });
+            }); */
     },
     'new': (req, res) => {
         db.Movie.findAll({
